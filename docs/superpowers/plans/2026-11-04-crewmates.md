@@ -33,11 +33,11 @@
 
 **Interfaces:** `validateCrew(input)`, `specialtiesFor(role)`, `sortCrew(rows)`, `crewStats(rows)`, and `createDemoCrewRepository(storage)` returning async `list/get/create/update/remove` methods.
 
-- [ ] Write domain and demo storage tests for validation, newest-first order, role change, persistence, missing records, and corrupt storage.
-- [ ] Run tests and confirm expected failures.
-- [ ] Implement the domain and demo repository.
-- [ ] Run tests and confirm they pass.
-- [ ] Commit the milestone.
+- [x] Write domain and demo storage tests for validation, newest-first order, role change, persistence, missing records, and corrupt storage.
+- [x] Run tests and confirm expected failures.
+- [x] Implement the domain and demo repository.
+- [x] Run tests and confirm they pass.
+- [x] Commit the milestone.
 
 ### Task 2: Supabase data path
 
