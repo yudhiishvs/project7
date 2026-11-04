@@ -57,11 +57,11 @@
 
 **Interfaces:** Routes `/`, `/create`, `/crew`, `/crew/:id`, `/crew/:id/edit`; create/edit/delete call the selected repository and refresh shared crew state.
 
-- [ ] Write UI tests for empty gallery, create, direct detail, edit, delete, and errors.
-- [ ] Run tests and confirm expected failures.
-- [ ] Implement accessible pages, state handling, responsive visuals, and title/metadata.
-- [ ] Run tests and confirm they pass.
-- [ ] Commit the milestone.
+- [x] Write UI tests for empty gallery, create, direct detail, edit, delete, and errors.
+- [x] Run tests and confirm expected failures.
+- [x] Implement accessible pages, state handling, responsive visuals, and title/metadata.
+- [x] Run tests and confirm they pass.
+- [x] Commit the milestone.
 
 ### Task 4: Delivery
 
