@@ -67,7 +67,7 @@
 
 **Files:** `README.md`, `public/walkthrough.gif`, package/config files.
 
-- [ ] Document Supabase setup, local demo, tests, feature checklist, and anonymous account limitation.
-- [ ] Run the full test suite and production build.
-- [ ] Exercise the main flows in a browser and capture a GIF walkthrough.
-- [ ] Commit the final milestone and create/invite to a private remote if account access permits.
+- [x] Document Supabase setup, local demo, tests, feature checklist, and anonymous account limitation.
+- [x] Run the full test suite and production build.
+- [x] Exercise the main flows in a browser and capture a GIF walkthrough.
+- [x] Commit the final milestone and create/invite to a private remote if account access permits.
