@@ -1,6 +1,8 @@
 import { Link, NavLink } from 'react-router'
 
-export default function Shell({ children, demo }) {
+export default function Shell({ children, demo, status }) {
+  const systemLabel = status === 'error' ? 'SYSTEM OFFLINE' : status === 'loading' ? 'CONNECTING' : 'SYSTEM ONLINE'
+  const modeLabel = demo ? 'LOCAL DEMO' : status === 'error' ? 'SUPABASE ERROR' : status === 'loading' ? 'CONNECTING' : 'SUPABASE LIVE'
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -21,9 +23,9 @@ export default function Shell({ children, demo }) {
         </div>
       </aside>
       <div className="content-shell">
-        <header className="topbar">
-          <div className="topbar-coordinate"><span className="signal-dot" /> SYSTEM ONLINE <span className="topbar-divider">/</span> SECTOR 07</div>
-          <span className="mode-pill">{demo ? 'LOCAL DEMO' : 'SUPABASE LIVE'}</span>
+        <header className={`topbar ${status === 'error' ? 'is-error' : ''}`}>
+          <div className="topbar-coordinate"><span className="signal-dot" /> {systemLabel} <span className="topbar-divider">/</span> SECTOR 07</div>
+          <span className="mode-pill">{modeLabel}</span>
         </header>
         <main id="main-content" className="main-content">{children}</main>
         <footer className="footer"><span>ORBIT CREW <span aria-hidden="true">✦</span> MISSION CONTROL</span><span>Made for explorers, by explorers.</span></footer>

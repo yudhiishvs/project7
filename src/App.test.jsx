@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import App from './App.jsx'
 import { createDemoCrewRepository } from './data/demoCrewRepository.js'
 
@@ -18,6 +18,8 @@ function open(path, crewRepository) {
   window.history.pushState({}, '', path)
   render(<App repository={crewRepository} />)
 }
+
+afterEach(() => vi.unstubAllEnvs())
 
 describe('crew screens', () => {
   it('shows a useful empty gallery with a route to create', async () => {
@@ -110,6 +112,30 @@ describe('crew screens', () => {
     await waitFor(() => expect(screen.getByText(/your gallery is waiting/i)).toBeTruthy())
   })
 
+  it('shows an actionable error for an invalid Supabase URL', async () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'YOUR_PROJECT_URL')
+    vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-key')
+    window.history.pushState({}, '', '/crew')
+
+    render(<App />)
+
+    expect(await screen.findByText(/supabase configuration is invalid/i)).toBeTruthy()
+    expect(screen.getByText(/VITE_SUPABASE_URL/)).toBeTruthy()
+    expect(screen.getByText('SUPABASE ERROR')).toBeTruthy()
+    expect(screen.queryByText(/demo mode/i)).toBeNull()
+  })
+
+  it('shows an error for partially configured Supabase instead of demo mode', async () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://example.supabase.co')
+    vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', '')
+    window.history.pushState({}, '', '/crew')
+
+    render(<App />)
+
+    expect(await screen.findByText(/supabase configuration is incomplete/i)).toBeTruthy()
+    expect(screen.queryByText(/demo mode/i)).toBeNull()
+  })
+
   it('starts a new page at the top after navigation', async () => {
     const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
     try {
@@ -135,5 +161,42 @@ describe('crew screens', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Medic' }))
     expect(screen.queryByText(/changes saved/i)).toBeNull()
     expect(screen.getByRole('radio', { name: 'Field Care' }).checked).toBe(true)
+  })
+
+  it('clears a previous success notice when a later save fails', async () => {
+    const crewRepository = repository()
+    const created = await crewRepository.create(input)
+    const originalUpdate = crewRepository.update
+    let saves = 0
+    crewRepository.update = async (...args) => {
+      saves += 1
+      if (saves === 2) throw new Error('Save failed')
+      return originalUpdate(...args)
+    }
+    open(`/crew/${created.id}/edit`, crewRepository)
+    await screen.findByLabelText(/crewmate name/i)
+
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }))
+    expect(await screen.findByText(/changes saved/i)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }))
+    expect(await screen.findByText(/save failed/i)).toBeTruthy()
+    expect(screen.queryByText(/changes saved/i)).toBeNull()
+  })
+
+  it('locks form inputs while a save is pending', async () => {
+    const crewRepository = repository()
+    const created = await crewRepository.create(input)
+    let finishSave
+    crewRepository.update = () => new Promise((resolve) => { finishSave = resolve })
+    open(`/crew/${created.id}/edit`, crewRepository)
+    const name = await screen.findByLabelText(/crewmate name/i)
+
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }))
+    expect(name.disabled).toBe(true)
+    expect(screen.getByRole('radio', { name: 'Medic' }).disabled).toBe(true)
+    expect(screen.getByLabelText(/a little about them/i).disabled).toBe(true)
+
+    await act(async () => { finishSave(created) })
+    expect(name.disabled).toBe(false)
   })
 })

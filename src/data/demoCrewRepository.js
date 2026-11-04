@@ -1,4 +1,4 @@
-import { crewInputOrThrow, sortCrew } from '../domain/crew.js'
+import { crewInputOrThrow, sortCrew, validateCrew } from '../domain/crew.js'
 
 const STORAGE_KEY = 'orbit-crew-demo-v1'
 
@@ -12,11 +12,20 @@ function makeId() {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
 }
 
+function isStoredCrewmate(row) {
+  return row && typeof row === 'object' && !Array.isArray(row)
+    && typeof row.id === 'string' && row.id.length > 0
+    && typeof row.name === 'string' && typeof row.note === 'string'
+    && typeof row.created_at === 'string' && Number.isFinite(Date.parse(row.created_at))
+    && typeof row.updated_at === 'string' && Number.isFinite(Date.parse(row.updated_at))
+    && validateCrew(row).ok
+}
+
 export function createDemoCrewRepository(storage = globalThis.localStorage) {
   function read() {
     try {
       const rows = JSON.parse(storage.getItem(STORAGE_KEY) ?? '[]')
-      return Array.isArray(rows) ? rows.filter((row) => row && typeof row.id === 'string') : []
+      return Array.isArray(rows) ? rows.filter(isStoredCrewmate) : []
     } catch {
       return []
     }

@@ -38,6 +38,7 @@ export default function CrewForm({ initial, onSubmit, onSaved, saveLabel }) {
     setErrors(result.errors)
     if (!result.ok) return
     setBusy(true)
+    setSaved(false)
     setRequestError('')
     try {
       const row = await onSubmit(result.value)
@@ -56,7 +57,7 @@ export default function CrewForm({ initial, onSubmit, onSaved, saveLabel }) {
       <form className="crew-form panel" onSubmit={submit} noValidate>
         <div className="section-label"><span>01</span> IDENTITY</div>
         <label className="field-label" htmlFor="crew-name">Crewmate name <span>*</span></label>
-        <input id="crew-name" className={`text-input ${errors.name ? 'invalid' : ''}`} value={form.name} onChange={(event) => change('name', event.target.value)} placeholder="e.g. Nova Stardust" maxLength="32" autoComplete="off" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'name-error' : undefined} />
+        <input id="crew-name" className={`text-input ${errors.name ? 'invalid' : ''}`} value={form.name} onChange={(event) => change('name', event.target.value)} placeholder="e.g. Nova Stardust" maxLength="32" autoComplete="off" disabled={busy} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'name-error' : undefined} />
         {errors.name && <p className="field-error" id="name-error">{errors.name}</p>}
         <p className="field-help">Every legend needs a name.</p>
 
@@ -65,7 +66,7 @@ export default function CrewForm({ initial, onSubmit, onSaved, saveLabel }) {
           <p className="section-help">What will they bring to the mission?</p>
           <div className="role-options">
             {ROLES.map((role) => <label className={`role-option ${form.role === role.id ? 'selected' : ''}`} key={role.id}>
-              <input type="radio" name="role" value={role.id} aria-label={role.label} checked={form.role === role.id} onChange={() => changeRole(role.id)} />
+              <input type="radio" name="role" value={role.id} aria-label={role.label} checked={form.role === role.id} onChange={() => changeRole(role.id)} disabled={busy} />
               <span className="role-icon" aria-hidden="true">{role.symbol}</span>
               <span><strong>{role.label}</strong><small>{role.description}</small></span>
               <span className="option-check" aria-hidden="true">✓</span>
@@ -79,7 +80,7 @@ export default function CrewForm({ initial, onSubmit, onSaved, saveLabel }) {
           <p className="section-help">Choose a focus for this role.</p>
           <div className="specialty-options">
             {specialtiesFor(form.role).map((specialty) => <label className={`chip-option ${form.specialty === specialty ? 'selected' : ''}`} key={specialty}>
-              <input type="radio" name="specialty" value={specialty} aria-label={specialty} checked={form.specialty === specialty} onChange={() => change('specialty', specialty)} />
+              <input type="radio" name="specialty" value={specialty} aria-label={specialty} checked={form.specialty === specialty} onChange={() => change('specialty', specialty)} disabled={busy} />
               {specialty}
             </label>)}
           </div>
@@ -91,7 +92,7 @@ export default function CrewForm({ initial, onSubmit, onSaved, saveLabel }) {
           <p className="section-help">Pick a color that stands out in the stars.</p>
           <div className="color-options">
             {COLORS.map((color) => <label className={`color-option ${form.color === color.id ? 'selected' : ''}`} key={color.id}>
-              <input type="radio" name="color" value={color.id} aria-label={color.label} checked={form.color === color.id} onChange={() => change('color', color.id)} />
+              <input type="radio" name="color" value={color.id} aria-label={color.label} checked={form.color === color.id} onChange={() => change('color', color.id)} disabled={busy} />
               <span className="color-swatch" style={{ background: color.hex }} />
               <span>{color.label}</span>
               <span className="option-check" aria-hidden="true">✓</span>
@@ -103,7 +104,7 @@ export default function CrewForm({ initial, onSubmit, onSaved, saveLabel }) {
         <div className="option-section">
           <div className="section-label"><span>05</span> MISSION NOTE</div>
           <label className="field-label" htmlFor="crew-note">A little about them <em>(optional)</em></label>
-          <textarea id="crew-note" className={`text-input text-area ${errors.note ? 'invalid' : ''}`} value={form.note} onChange={(event) => change('note', event.target.value)} maxLength="160" placeholder="What makes this crewmate one of a kind?" />
+          <textarea id="crew-note" className={`text-input text-area ${errors.note ? 'invalid' : ''}`} value={form.note} onChange={(event) => change('note', event.target.value)} maxLength="160" placeholder="What makes this crewmate one of a kind?" disabled={busy} />
           <p className="field-help char-count">{form.note.length}/160 characters</p>
           {errors.note && <p className="field-error">{errors.note}</p>}
         </div>

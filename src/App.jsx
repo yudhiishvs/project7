@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation, useParams } from 'react-router'
 import Shell from './components/Shell.jsx'
 import { sortCrew } from './domain/crew.js'
-import { createAppRepository, isSupabaseConfigured } from './data/repository.js'
+import { createAppRepository, isDemoMode } from './data/repository.js'
 import HomePage from './pages/HomePage.jsx'
 import CreatePage from './pages/CreatePage.jsx'
 import GalleryPage from './pages/GalleryPage.jsx'
@@ -24,44 +24,49 @@ function ScrollToTop() {
 }
 
 export default function App({ repository }) {
-  const [crewRepository] = useState(() => repository ?? createAppRepository())
+  const repositoryRef = useRef(repository ?? null)
   const [crew, setCrew] = useState([])
   const [status, setStatus] = useState('loading')
   const [loadError, setLoadError] = useState('')
+
+  const getRepository = useCallback(() => {
+    if (!repositoryRef.current) repositoryRef.current = createAppRepository()
+    return repositoryRef.current
+  }, [])
 
   const load = useCallback(async () => {
     setStatus('loading')
     setLoadError('')
     try {
-      setCrew(sortCrew(await crewRepository.list()))
+      setCrew(sortCrew(await getRepository().list()))
       setStatus('ready')
     } catch (error) {
       setLoadError(error.message || 'Could not load your crew.')
       setStatus('error')
     }
-  }, [crewRepository])
+  }, [getRepository])
 
   useEffect(() => { load() }, [load])
 
   async function create(input) {
-    const row = await crewRepository.create(input)
+    const row = await getRepository().create(input)
     setCrew((current) => sortCrew([...current, row]))
     return row
   }
 
   async function update(id, input) {
-    const row = await crewRepository.update(id, input)
+    const row = await getRepository().update(id, input)
     setCrew((current) => sortCrew(current.map((member) => member.id === id ? row : member)))
     return row
   }
 
   async function remove(id) {
-    if (!await crewRepository.remove(id)) throw new Error('Crewmate not found.')
+    if (!await getRepository().remove(id)) throw new Error('Crewmate not found.')
     setCrew((current) => current.filter((member) => member.id !== id))
   }
 
-  return <BrowserRouter><ScrollToTop /><Shell demo={!isSupabaseConfigured()}>
-    {!isSupabaseConfigured() && <div className="demo-banner"><span className="signal-dot" /><strong>Demo mode</strong><span>Your crew is saved in this browser. Add Supabase settings to use the cloud database.</span></div>}
+  return <BrowserRouter><ScrollToTop /><Shell demo={isDemoMode()} status={status}>
+    {isDemoMode() && <div className="demo-banner"><span className="signal-dot" /><strong>Demo mode</strong><span>Your crew is saved in this browser. Add Supabase settings to use the cloud database.</span></div>}
     {status === 'loading' ? <div className="loading-state" role="status"><span className="loading-orbit">✦</span><p>Connecting to mission control…</p></div>
       : status === 'error' ? <div className="missing-state panel"><span className="missing-symbol">!</span><span className="eyebrow">CONNECTION TROUBLE</span><h1>Unable to load crew.</h1><p>{loadError}</p><button className="button button-primary" type="button" onClick={load}>Try again <span aria-hidden="true">↻</span></button></div>
         : <Routes>

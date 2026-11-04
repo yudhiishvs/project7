@@ -65,6 +65,21 @@ describe('demo crew repository', () => {
     expect(await repository.list()).toHaveLength(1)
   })
 
+  it('drops structurally invalid saved records before rendering or editing', async () => {
+    const stored = [
+      { id: 'broken', name: null, note: null },
+      { id: 'wrong-role', ...input, role: 'captain', created_at: '2026-11-04T00:00:00.000Z', updated_at: '2026-11-04T00:00:00.000Z' },
+      { id: 'bad-date', ...input, created_at: 'yesterday', updated_at: '2026-11-04T00:00:00.000Z' },
+    ]
+    const storage = memoryStorage({ 'orbit-crew-demo-v1': JSON.stringify(stored) })
+    const repository = createDemoCrewRepository(storage)
+
+    expect(await repository.list()).toEqual([])
+    expect(await repository.get('broken')).toBeNull()
+    expect((await repository.create(input)).name).toBe('Nova')
+    expect(await repository.list()).toHaveLength(1)
+  })
+
   it('rejects invalid saves and unknown edit targets', async () => {
     const repository = createDemoCrewRepository(memoryStorage())
     await expect(repository.create({ ...input, name: ' ' })).rejects.toThrow(/name/i)
