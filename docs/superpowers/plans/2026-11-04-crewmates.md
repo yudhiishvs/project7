@@ -45,11 +45,11 @@
 
 **Interfaces:** `createSupabaseCrewRepository(client)` exposes the same async methods as Task 1; `ensureSession()` restores or creates an anonymous session.
 
-- [ ] Write tests for auth bootstrap, filtered CRUD requests, and surfaced request errors.
-- [ ] Run tests and confirm expected failures.
-- [ ] Implement the adapter, SQL table, grants, and four RLS policies.
-- [ ] Run tests and confirm they pass.
-- [ ] Commit the milestone.
+- [x] Write tests for auth bootstrap, filtered CRUD requests, and surfaced request errors.
+- [x] Run tests and confirm expected failures.
+- [x] Implement the adapter, SQL table, grants, and four RLS policies.
+- [x] Run tests and confirm they pass.
+- [x] Commit the milestone.
 
 ### Task 3: Screens and interactions
 
